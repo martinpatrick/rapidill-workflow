@@ -1,0 +1,44 @@
+rule "if there is a 954 and a 955 then delete the 955"
+#analytic records will have 955
+priority 60
+when
+(exists "954") AND (exists "955")
+then
+removeField "955"
+end
+
+rule "change 955 to 954 if there is a 955 and there is not a 954"
+#analytic records will have 955
+priority 50
+when
+(not exists "954") AND (exists "955")
+then
+removeSubField "955.z"
+removeSubField "955.8"
+changeField "955" to "954"
+end
+
+rule "Drop non TWIN CITIES libraries"
+#the non lendable feeds include all Twin Cities libraries, so look for anything where q doesn't start with t
+priority 40
+when
+(TRUE)
+then
+removeField "954" if (not exists "954.q.T*")
+end
+
+rule "remove out of scope locs"
+#looks for twils locations and then loc codes because some loc codes exist in non twils libraries
+priority 20
+when
+(exists "954.q.TWILS")
+then
+removeField "954" if (exists "954.r.AME|AMEJ|AMER|BDIS|CLS|CLSE|CLSP|CRSVL|EAS|EASF|EASJ|EQP|EQPS|GEN|GOVCD|GOVCG|GOVH|GOVJ|GOVK|GOVN|GOVO|GOVQ|GOVR|GOVU|GOVX|MAP|MAPF|MAPMB|MAPMM|MAPP|MAPQ|MAPR|MAPT|NBK|PAM|PER|PERC|POP|REF|REFA|STF|THS") 
+end
+
+rule "Delete 035 Aleph"
+when
+TRUE
+then
+RemoveField "035" if (exists "035.a.*Aleph*")
+end

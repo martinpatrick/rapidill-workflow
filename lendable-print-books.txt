@@ -1,0 +1,60 @@
+rule "Drop process or policy types"
+priority 40
+when
+(TRUE)
+then
+removeField "954" if (exists "954.y.ACQ|WORK_ORDER_DEPARTMENT|TRANSIT|TECHNICAL|MISSING|HOLDSHELF")
+removeField "954" if (exists "954.x.02")
+end
+
+rule "if there is a 954 and a 955 then delete the 955"
+#analytic records will have 955
+priority 30
+when
+(exists "954") AND (exists "955")
+then
+removeField "955"
+end
+
+rule "change 955 to 954 if there is a 955 and there is not a 954"
+#analytic records will have 955
+priority 20
+when
+(not exists "954") AND (exists "955")
+then
+removeSubField "955.z"
+removeSubField "955.8"
+changeField "955" to "954"
+end
+
+rule "Drop non TWIN CITIES libraries"
+priority 10
+when
+(TRUE)
+then
+removeField "954" if (not exists "954.q.TWILS")
+end
+
+rule "remove out of scope locs"
+#adjust 954r to be location codes within TWILS that we are lending from
+priority 2
+when
+(TRUE)
+then
+removeField "954" if (not exists "954.r.AME|AMEJ|AMER|BDIS|CLS|CLSE|CLSP|CRSVL|EAS|EASF|EASJ|EQP|EQPS|GEN|GOVCD|GOVCG|GOVH|GOVJ|GOVK|GOVN|GOVO|GOVQ|GOVR|GOVU|GOVX|MAP|MAPF|MAPMB|MAPMM|MAPP|MAPQ|MAPR|MAPT|NBK|PAM|PER|PERC|POP|REF|REFA|STF|THS")
+end
+
+rule "remove microfilm"
+priority 1
+when
+(TRUE)
+then
+removeField "954" if (exists "337.a.micro*")
+end
+
+rule "Delete 035 Aleph"
+when
+TRUE
+then
+RemoveField "035" if (exists "035.a.*Aleph*")
+end
